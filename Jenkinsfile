@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "lidordayan/flask-app"
+        IMAGE_NAME = "lidordayan/site-app"
     }
 
     stages {
