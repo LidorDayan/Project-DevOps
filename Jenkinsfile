@@ -33,7 +33,7 @@ pipeline {
             steps {
                 sh '''
                     kubectl apply -f deployment.yaml
-                    kubectl apply -f flask-service.yaml
+                    kubectl apply -f site-service.yaml
                 '''
             }
         }
