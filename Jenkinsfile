@@ -29,12 +29,39 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Configure Worker with Ansible') {
             steps {
-                sh '''
-                    kubectl apply -f deployment.yaml
-                    kubectl apply -f site-service.yaml
-                '''
+                withCredentials([string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS')]) {
+                    sh '''
+                        cd ansible
+                        ansible-playbook -i inventory.ini playbook.yaml \
+                          --extra-vars "ansible_become_pass=$SUDO_PASS"
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Flask App with Ansible') {
+            steps {
+                withCredentials([string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS')]) {
+                    sh '''
+                        cd ansible
+                        ansible-playbook -i inventory.ini deploy_site.yaml \
+                          --extra-vars "ansible_become_pass=$SUDO_PASS image_name=$IMAGE_NAME"
+                    '''
+                }
+            }
+        }
+
+        stage('Run Ad-hoc Checks') {
+            steps {
+                withCredentials([string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS')]) {
+                    sh '''
+                        cd ansible
+                        chmod +x adhoc.sh
+                        ./adhoc.sh "$SUDO_PASS"
+                    '''
+                }
             }
         }
     }
