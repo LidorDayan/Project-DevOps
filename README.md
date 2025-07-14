@@ -22,7 +22,6 @@ Prepare two Linux VMs (e.g. Ubuntu):
   * Ansible installed
   * SSH private key configured for access to the Worker VM
   * Docker installed and running (configure to run docker without sudo)
-  * Jenkins installed
 - Worker VM:
   * Install Openssh
   * copy public ssh of the master vm to the worker vm
