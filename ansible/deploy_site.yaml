@@ -29,7 +29,7 @@
 
     - name: Copy service file to worker
       copy:
-        src: site-service.yaml
+        src: "../site-service.yaml"
         dest: "{{ deploy_path }}/site-service.yaml"
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
