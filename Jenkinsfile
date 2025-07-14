@@ -31,10 +31,15 @@ pipeline {
 
         stage('Configure Worker with Ansible') {
             steps {
-                withCredentials([string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS')]) {
+                withCredentials([
+                    string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS'),
+                    sshUserPrivateKey(credentialsId: 'ssh_to_worker', keyFileVariable: 'SSH_KEY')
+                ]) {
                     sh '''
                         cd ansible
+                        ANSIBLE_HOST_KEY_CHECKING=False \
                         ansible-playbook -i inventory.ini playbook.yaml \
+                          --private-key "$SSH_KEY" \
                           --extra-vars "ansible_become_pass=$SUDO_PASS"
                     '''
                 }
@@ -43,10 +48,15 @@ pipeline {
 
         stage('Deploy Flask App with Ansible') {
             steps {
-                withCredentials([string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS')]) {
+                withCredentials([
+                    string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS'),
+                    sshUserPrivateKey(credentialsId: 'ssh_to_worker', keyFileVariable: 'SSH_KEY')
+                ]) {
                     sh '''
                         cd ansible
+                        ANSIBLE_HOST_KEY_CHECKING=False \
                         ansible-playbook -i inventory.ini deploy_site.yaml \
+                          --private-key "$SSH_KEY" \
                           --extra-vars "ansible_become_pass=$SUDO_PASS image_name=$IMAGE_NAME"
                     '''
                 }
@@ -55,7 +65,10 @@ pipeline {
 
         stage('Run Ad-hoc Checks') {
             steps {
-                withCredentials([string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS')]) {
+                withCredentials([
+                    string(credentialsId: 'worker_sudo_pass', variable: 'SUDO_PASS'),
+                    sshUserPrivateKey(credentialsId: 'ssh_to_worker', keyFileVariable: 'SSH_KEY')
+                ]) {
                     sh '''
                         cd ansible
                         chmod +x adhoc.sh
