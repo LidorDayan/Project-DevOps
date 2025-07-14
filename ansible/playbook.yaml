@@ -1,9 +1,7 @@
 - name: Set up Docker, K3s, and Python3-pip on worker VM
   hosts: worker
   become: yes
-  vars_files:
-    - vault/vault.yml
-
+  
   tasks:
     - name: Install required apt packages
       apt:
