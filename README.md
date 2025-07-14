@@ -26,6 +26,26 @@ Prepare two Linux VMs (e.g. Ubuntu):
   * Install Openssh
   * Copy public ssh from the master vm to the worker vm
   * All the the required programs will be installed automaticaly by Ansible.
+    
+### GitHub Configuration (Before Running the Pipeline)
+To successfully configure your pipeline and automation, make the following updates in your cloned GitHub repo:
+1. ansible/inventory.ini
+   * Set the correct IP address and SSH username of your worker VM:
+     ```ini
+      [worker]
+      worker-vm ansible_host=[worker IP] ansible_user=[worker user name]
+     ```
+3. ansible/deploy_site.yaml
+   * Update line 10 with your actual worker VM username [worker user name]:
+     ```yaml
+      kubeconfig_path: "/home/[worker user name]/k3s.yaml"
+     ```
+5. ansible/adhoc.sh
+   * Update line 7 with your actual worker VM username [worker user name]:
+     ```bash
+      ansible worker -i inventory.ini -m shell -a "KUBECONFIG=/home/[worker user name]/k3s.yaml kubectl get svc"
+     ```
+     
 ### Jenkins Configuration
 Jenkins must have:
 * Access to your GitHub repo
@@ -72,18 +92,30 @@ http://<node-ip>:30007
 
 ## 📁 Project Structure
 ```csharp
-├── static/css/
-│   └── style.css                  # CSS styling
+├── ansible/
+│   ├── templates/
+│   │   └── deployment.yaml.j2           # Jinja2 template for Kubernetes deployment
+│   ├── adhoc.sh                         # Optional validation or manual script
+│   ├── deploy_site.yaml                 # Ansible playbook for deploying site
+│   ├── inventory.ini                    # Inventory file with target hosts
+│   └── playbook.yaml                    # Ansible playbook for installing Docker, K3s, pip
+│
+├── static/
+│   └── css/
+│       └── style.css                   # CSS styles for the Flask app
+│
 ├── templates/
-│   ├── base.html                  # HTML base layout
-│   └── index.html                 # Main page template
-├── .gitignore                     # Git ignore rules
-├── app.py                         # Flask application
-├── requirements.txt              # Python dependencies
-├── Dockerfile                     # Docker image definition
-├── Jenkinsfile                    # Jenkins pipeline steps
-├── deployment.yaml                # Kubernetes deployment config
-├── site-service.yaml              # Kubernetes NodePort service
-└── README.md                      # Project documentation
+│   ├── base.html                       # Base HTML layout
+│   └── index.html                      # Main HTML page for the Flask app
+│
+├── .gitignore                          # Specifies files to be ignored by Git
+├── Dockerfile                          # Docker image definition for the Flask app
+├── Jenkinsfile                         # Jenkins pipeline definition
+├── README.md                           # Project documentation (this file)
+├── app.py                              # Main Flask application
+├── deployment.yaml                     # Kubernetes deployment (rendered or static)
+├── requirements.txt                    # Python dependencies
+├── site-service.yaml                   # Kubernetes NodePort service definition
+
 ```
 
