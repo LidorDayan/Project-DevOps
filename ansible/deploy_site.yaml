@@ -7,7 +7,7 @@
     app_name: site-app
     image_name: lidordayan/site-app
     container_port: 5000
-    kubeconfig_path: "/home/lidorwo/k3s.yaml"
+    kubeconfig_path: "/home/[worker user name]/k3s.yaml"
     deploy_path: "/home/{{ ansible_user }}"
 
   tasks:
