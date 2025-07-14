@@ -30,7 +30,7 @@ Prepare two Linux VMs (e.g. Ubuntu):
 Jenkins must have:
 * Access to your GitHub repo
 * Docker Hub credentials (Docker_cred) stored in Jenkins
-* Sudo password for the worker VM stored as a String Credential (worker_sudo_pass)
+* Sudo password for the worker VM stored as a Secret text (worker_sudo_pass)
 * SSH private key stored as SSH Username with private key (ssh_to_worker) to allow Ansible to connect
 
 ### SSH Key Setup for Jenkins & Ansible
