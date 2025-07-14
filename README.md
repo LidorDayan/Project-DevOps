@@ -25,7 +25,7 @@ Prepare two Linux VMs (e.g. Ubuntu):
 - Worker VM:
   * Install Openssh
   * Copy public ssh from the master vm to the worker vm
-  * all the rest will be installed automaticaly by Ansible.
+  * All the the required programs will be installed automaticaly by Ansible.
 ### Jenkins Configuration
 Jenkins must have:
 * Access to your GitHub repo
