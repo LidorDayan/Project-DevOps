@@ -51,7 +51,7 @@ Copy the full content, including the markers:
 1. Go to Manage Jenkins → Credentials → Global → Add Credentials
 2. Select:
   - Kind: SSH Username with private key
-  - Username: lidorw
+  - Username: [The user of the worker]
   - Private Key: Enter directly and paste the full key
   - ID: ssh_to_worker
 3. Click Save
