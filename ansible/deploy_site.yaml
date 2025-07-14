@@ -1,0 +1,50 @@
+---
+- name: Deploy Flask app to Kubernetes on worker VM
+  hosts: worker
+  become: yes
+
+  vars:
+    app_name: site-app
+    image_name: lidordayan/site-app
+    container_port: 5000
+    kubeconfig_path: "/home/lidorw/k3s.yaml"
+    deploy_path: "/home/{{ ansible_user }}"
+
+  tasks:
+
+    - name: Ensure Kubernetes deployment directory exists
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Copy deployment template to worker
+      template:
+        src: templates/deployment.yaml.j2
+        dest: "{{ deploy_path }}/deployment.yaml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Copy service file to worker
+      copy:
+        src: site-service.yaml
+        dest: "{{ deploy_path }}/site-service.yaml"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Apply Kubernetes deployment and service
+      shell: |
+        KUBECONFIG={{ kubeconfig_path }} kubectl apply -f deployment.yaml
+        KUBECONFIG={{ kubeconfig_path }} kubectl apply -f site-service.yaml
+      args:
+        chdir: "{{ deploy_path }}"
+      notify: Restart K3s
+
+  handlers:
+    - name: Restart K3s
+      systemd:
+        name: k3s
+        state: restarted
