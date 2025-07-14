@@ -1,33 +1,69 @@
-﻿# CI/CD Project: Flask App with Jenkins, Docker & Kubernetes
+﻿# CI/CD Project: Flask App with Jenkins, Ansible, Docker & Kubernetes 
 
 ## Overview
-This project shows how to set up a full CI/CD pipeline for a Flask web app. Jenkins manages the whole process, from making a Docker image to submitting it to Docker Hub and then using kubectl to deploy it to a Kubernetes cluster.
+This project demonstrates a complete CI/CD pipeline for deploying a Flask web application using Jenkins, Docker, and Kubernetes (K3s).
+Ansible is used to automatically configure the worker VM by installing required tools and deploying the Flask app.
 
 ## Tools & Technologies
+* Jenkins – CI/CD pipeline orchestration
+* Ansible – Infrastructure automation
 * Python – for Web application
 * Docker – Containerization
 * Docker Hub – Image registry
-* Jenkins – CI/CD orchestration
-* Kubernetes – Deployment platform
+* K3s – Lightweight Kubernetes distribution
 * GitHub – Source control and project management
 
 ## Prerequisites
 Before running the pipeline, make sure you have the following in place:
 ### Environment Setup
-* A Linux VM (e.g. Ubuntu) with:
+Prepare two Linux VMs (e.g. Ubuntu):
+- Master VM:
+  * Jenkins installed
+  * Ansible installed
+  * SSH private key configured for access to the Worker VM
   * Docker installed and running (configure to run docker without sudo)
   * Jenkins installed
-  * K3s installed and configured (configure to run kubectl without sudo)
+- Worker VM:
+  * Install Openssh
+  * copy public ssh of the master vm to the worker vm
+  * all the rest will be installed automaticaly by Ansible.
 ### Jenkins Configuration
 Jenkins must have:
-* Access to your GitHub repo (via HTTPS or SSH)
-* Docker Hub credential set up in Jenkins for pushing images
+* Access to your GitHub repo
+* Docker Hub credentials (Docker_cred) stored in Jenkins
+* Sudo password for the worker VM stored as a String Credential (worker_sudo_pass)
+* SSH private key stored as SSH Username with private key (ssh_to_worker) to allow Ansible to connect
+
+### SSH Key Setup for Jenkins & Ansible
+To allow Jenkins to SSH into the worker VM and run Ansible playbooks:
+#### Step 1: Copy the Private Key for Jenkins
+Run:
+```bash
+cat ~/.ssh/[you_rsa_file]
+```
+Copy the full content, including the markers:
+```vbnet
+-----BEGIN RSA PRIVATE KEY-----
+...your key...
+-----END RSA PRIVATE KEY-----
+```
+#### Step 2: Add the SSH Key in Jenkins
+1. Go to Manage Jenkins → Credentials → Global → Add Credentials
+2. Select:
+  - Kind: SSH Username with private key
+  - Username: lidorw
+  - Private Key: Enter directly and paste the full key
+  - ID: ssh_to_worker
+3. Click Save
 
 ## How the Pipeline Works
-- Jenkins pulls the code from GitHub, including the Jenkinsfile
-- It builds a Docker image using the Dockerfile
-- The image is pushed to Docker Hub
-- Jenkins then applies deployment.yaml and site-service.yaml to the Kubernetes cluster using kubectl
+1. Jenkins pulls the code and Jenkinsfile from GitHub
+2. Docker builds the image and tags it as lidordayan/site-app
+3. The image is pushed to Docker Hub
+4. Jenkins triggers Ansible to:
+  - Install Docker, K3s, and pip on the worker VM
+  - Deploy the Flask app using deployment.yaml and site-service.yaml
+5. An ad-hoc script is run to verify the setup (e.g., docker, kubectl, services)
 
 ## Accessing the App
 Once the deployment is complete, open the app in your browser at:
